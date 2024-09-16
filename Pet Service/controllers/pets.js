@@ -1,4 +1,5 @@
 const Pet = require("../models/Pet");
+const { Types } = require('mongoose');
 
 exports.getPets = async (req, res) => {
   let uid = req.params.userId;
@@ -83,44 +84,118 @@ exports.createPet = async (req, res) => {
 
 exports.updatePet = async (req, res) => {
   try {
-    let pid = req.params.id;
-    const pet = await Pet.findById(pid);
 
-    if (!pet) {
+    let pid = req.params.id;
+
+    if (!pid) {
+      return res.status(400).json({
+        success: false,
+        message: "petId not specified",
+      });
+    }
+
+    if (!Types.ObjectId.isValid(pid)) {
+      return res.status(400).json({
+        success: false,
+        message: "petId is invalid",
+      });
+    }
+
+    const updatedPet = await Pet.findByIdAndUpdate(pid, req.body, {
+      new: true
+    });
+
+    if (!updatedPet) {
       return res.status(404).json({
         success: false,
         message: `No Pets with the id of ${pid}`,
       });
     }
 
-    const updatedPet = await Pet.findByIdAndUpdate(pid, req.body, {
-      new: true,
-      runValidators: true,
+    return res.status(200).json({
+      success: true,
+      data: updatedPet
     });
-    res.json(updatedPet);
+
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 };
 
 exports.deletePet = async (req, res) => {
   try {
+    
     let pid = req.params.id;
-    const pet = await Pet.findById(pid);
 
-    if (!pet) {
-      return res.status(404).json({
+    if (!pid) {
+      return res.status(400).json({
         success: false,
-        message: `No Pet with the id of ${pid}`,
+        message: "petId not specified",
       });
     }
-    await pet.deleteOne();
-    res.status(200).json({
+
+    if (!Types.ObjectId.isValid(pid)) {
+      return res.status(400).json({
+        success: false,
+        message: "petId is invalid",
+      });
+    }
+
+    const deletedPet = await Pet.findByIdAndDelete(pid);
+
+    if (!deletedPet) {
+      return res.status(404).json({
+        success: false,
+        message: `No Pets with the id of ${pid}`,
+      });
+    }
+
+    return res.status(200).json({
       success: true,
       data: {},
       message: `Pet ${pid} is now deleted.`,
     });
+
   } catch {
-    res.status(400).json({ message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
+};
+
+exports.getRandomPets = async (req, res) => {
+
+  try {
+
+    const randomPets = await Pet.aggregate([
+      { $sample: { size: 3 } },
+      {
+        $project: {
+          _id: 0,
+          petId: "$_id",
+          petName: 1,
+          species: 1,
+          gender: 1,
+          age: 1,
+          image: { $arrayElemAt: ["$image", 0] }
+        },
+      }
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: randomPets
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+
 };
