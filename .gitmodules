@@ -1,0 +1,12 @@
+[submodule "pet-match-service"]
+	path = pet-match-service
+	url = https://github.com/Pattarapon0/pet-match-service.git
+[submodule "pet-profile-service"]
+	path = pet-profile-service
+	url = https://github.com/Katawaytee/pet-profile-service.git
+[submodule "pawMatch_user"]
+	path = pawMatch_user
+	url = https://github.com/05j09a97b/pawMatch_user.git
+[submodule "pawmatch-review"]
+	path = pawmatch-review
+	url = https://github.com/tanyapatbks/pawmatch-review.git
