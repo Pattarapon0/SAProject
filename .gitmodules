@@ -10,3 +10,6 @@
 [submodule "pawmatch-review"]
 	path = pawmatch-review
 	url = https://github.com/tanyapatbks/pawmatch-review.git
+[submodule "pawmatch_front"]
+	path = pawmatch_front
+	url = https://github.com/tanyapatbks/pawmatch_front
